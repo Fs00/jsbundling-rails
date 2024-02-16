@@ -63,7 +63,10 @@ end
 
 unless ENV["SKIP_JS_BUILD"]
   if Rake::Task.task_defined?("assets:precompile")
-    Rake::Task["assets:precompile"].enhance(["javascript:build"])
+    # Make sure that the build task runs before the "environment" task (which is a prerequisite
+    # of "assets:precompile"), so that Sprockets is loaded after assets have been built.
+    # Prevents https://github.com/rails/jsbundling-rails/issues/162
+    Rake::Task["assets:precompile"].prereqs.prepend("javascript:build")
   end
 
   if Rake::Task.task_defined?("test:prepare")
